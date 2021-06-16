@@ -10,7 +10,7 @@ export default class myDocument extends Document {
     return (
       <Html>
         <Head>
-          <title>Clothing shop management system</title>
+          <title>Notion task</title>
           <meta name="description" content="" />
           <link rel="icon" href="/favicon.ico" />
         </Head>
