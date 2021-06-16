@@ -29,7 +29,7 @@ export default function Home() {
           {data
             .filter((task) => task.state == 'Backlog')
             .map((task) => {
-              return <TaskItem key={task.id} taskName={task.name} />;
+              return <TaskItem key={task.id} task={task} />;
             })}
         </TaskList>
         <TaskList
@@ -42,13 +42,7 @@ export default function Home() {
           {data
             .filter((task) => task.state == 'On Progress')
             .map((task) => {
-              return (
-                <TaskItem
-                  key={task.id}
-                  taskName={task.name}
-                  defaultChecked={task.state == 'Done'}
-                />
-              );
+              return <TaskItem key={task.id} task={task} />;
             })}
         </TaskList>
         <TaskList mt={4} title="Done" state="Done" collapsible>
@@ -58,7 +52,7 @@ export default function Home() {
               return (
                 <TaskItem
                   key={task.id}
-                  taskName={task.name}
+                  task={task}
                   defaultChecked={task.state == 'Done'}
                 />
               );

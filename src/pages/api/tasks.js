@@ -9,11 +9,7 @@ export default async function handler(req, res) {
       const pageId = req.query.id;
       const { name, project, state } = req.body;
       const Project = {
-        multi_select: [
-          {
-            name: project,
-          },
-        ],
+        multi_select: project,
       };
       const Task = {
         title: [
