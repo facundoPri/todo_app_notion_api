@@ -1,13 +1,23 @@
 import { Checkbox } from '@chakra-ui/checkbox';
 import { Divider } from '@chakra-ui/layout';
 import { Box, Flex, Text } from '@chakra-ui/layout';
+import { Spinner } from '@chakra-ui/spinner';
 import TaskItem from '../components/TaskItem';
 import TaskList from '../components/TaskList';
+import { useFetch } from '../hooks/useFetch';
+import { useTasks } from '../hooks/useTasks';
 
 const { Client } = require('@notionhq/client');
 
-export default function Home({ tasks }) {
-  console.log(tasks);
+export default function Home() {
+  const { data, isLoading, error } = useTasks();
+  if (error) {
+    return <Text>Error</Text>;
+  }
+  if (isLoading) {
+    return <Spinner alignSelf="center" />;
+  }
+  console.log(data);
   return (
     <Flex flexDir="column" alignItems="center" flex="1">
       <Flex my={15}>
@@ -15,42 +25,41 @@ export default function Home({ tasks }) {
       </Flex>
 
       <Flex flexDir="column" w={800}>
-        <TaskList title="To-Do" add>
-          {tasks
-            .filter((task) => task.properties.State.select.name == 'Backlog')
+        <TaskList title="To-Do" state="Backlog" add>
+          {data
+            .filter((task) => task.state == 'Backlog')
+            .map((task) => {
+              return <TaskItem key={task.id} taskName={task.name} />;
+            })}
+        </TaskList>
+        <TaskList
+          mt={4}
+          title="On Progress"
+          state="On Progress"
+          collapsible
+          add
+        >
+          {data
+            .filter((task) => task.state == 'On Progress')
             .map((task) => {
               return (
                 <TaskItem
                   key={task.id}
-                  taskName={task.properties.Task.title[0].text.content}
+                  taskName={task.name}
+                  defaultChecked={task.state == 'Done'}
                 />
               );
             })}
         </TaskList>
-        <TaskList mt={4} title="On Progress" collapsible add>
-          {tasks
-            .filter(
-              (task) => task.properties.State.select.name == 'On Progress',
-            )
+        <TaskList mt={4} title="Done" state="Done" collapsible>
+          {data
+            .filter((task) => task.state == 'Done')
             .map((task) => {
               return (
                 <TaskItem
                   key={task.id}
-                  taskName={task.properties.Task.title[0].text.content}
-                  defaultChecked={task.properties.State.select.name == 'Done'}
-                />
-              );
-            })}
-        </TaskList>
-        <TaskList mt={4} title="Done" collapsible>
-          {tasks
-            .filter((task) => task.properties.State.select.name == 'Done')
-            .map((task) => {
-              return (
-                <TaskItem
-                  key={task.id}
-                  taskName={task.properties.Task.title[0].text.content}
-                  defaultChecked={task.properties.State.select.name == 'Done'}
+                  taskName={task.name}
+                  defaultChecked={task.state == 'Done'}
                 />
               );
             })}

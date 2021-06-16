@@ -14,10 +14,14 @@ import { Flex } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/layout';
 import { StatHelpText } from '@chakra-ui/stat';
 import { Collapse } from '@chakra-ui/transition';
+import axios from 'axios';
 import { useRef, useState } from 'react';
+import { mutate } from 'swr';
+import { useTasks } from '../hooks/useTasks';
 import TaskItem from './TaskItem';
 
-function AddTodo({ isInputOpen, setInputOpen, showAdd }) {
+function AddTodo({ isInputOpen, setInputOpen, showAdd, state }) {
+  const { data, mutate } = useTasks();
   const ref = useRef(null);
   const [value, setValue] = useState('');
   useOutsideClick({
@@ -25,11 +29,19 @@ function AddTodo({ isInputOpen, setInputOpen, showAdd }) {
     handler: () => setInputOpen(false),
   });
 
-  function handleAddTodo(e) {
+  async function handleAddTodo(e) {
     e.preventDefault();
-    alert(value);
+    const project = 'Notion api';
+    const newTask = {
+      name: value,
+      state,
+      project,
+    };
     setValue('');
     setInputOpen(false);
+    mutate([{ ...newTask, id: Date.now() }, ...data], false);
+    await axios.post('/api/tasks', newTask);
+    mutate();
   }
 
   return (
@@ -67,7 +79,7 @@ function AddTodo({ isInputOpen, setInputOpen, showAdd }) {
           <>
             <Flex
               onClick={() => {
-                setIsModalOpen(true);
+                setInputOpen(true);
               }}
               py={2}
               minH={50}
@@ -92,6 +104,8 @@ export default function TaskList({
   add,
   collapsible,
   children,
+  state,
+  showAdd,
   ...props
 }) {
   const { isOpen, onOpen, onToggle } = useDisclosure();
@@ -128,7 +142,12 @@ export default function TaskList({
           />
         )}
       </Flex>
-      <AddTodo isInputOpen={isInputOpen} setInputOpen={setInputOpen} />
+      <AddTodo
+        isInputOpen={isInputOpen}
+        setInputOpen={setInputOpen}
+        state={state}
+        showAdd={showAdd}
+      />
       {collapsible ? (
         <Collapse in={isOpen}>{children}</Collapse>
       ) : (
